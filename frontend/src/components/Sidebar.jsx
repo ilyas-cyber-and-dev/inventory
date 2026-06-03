@@ -2,8 +2,10 @@ import {
     LayoutDashboard,
     Package,
     BarChart3,
-    Settings
+    Settings,
 } from "lucide-react";
+
+import { Link } from "react-router-dom";
 
 function Sidebar() {
     return (
@@ -12,26 +14,40 @@ function Sidebar() {
                 InventoryFlow
             </h1>
 
-            <nav className="mt-10 space-y-4">
-                <div className="flex items-center gap-3">
+            <nav className="mt-10 space-y-2">
+
+                <Link
+                    to="/"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100"
+                >
                     <LayoutDashboard size={18} />
                     <span>Dashboard</span>
-                </div>
+                </Link>
 
-                <div className="flex items-center gap-3">
+                <Link
+                    to="/products"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100"
+                >
                     <Package size={18} />
                     <span>Products</span>
-                </div>
+                </Link>
 
-                <div className="flex items-center gap-3">
+                <Link
+                    to="/analytics"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100"
+                >
                     <BarChart3 size={18} />
                     <span>Analytics</span>
-                </div>
+                </Link>
 
-                <div className="flex items-center gap-3">
+                <Link
+                    to="/settings"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-100"
+                >
                     <Settings size={18} />
                     <span>Settings</span>
-                </div>
+                </Link>
+
             </nav>
         </aside>
     );
