@@ -1,38 +1,39 @@
-const prisma = require("../lib/prisma");
+const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    const existinguser = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const [existingUsers] = await db.execute(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
 
-    if (existinguser) {
+    if (existingUsers.length > 0) {
       return res.status(400).json({
-        message: "email telah di gunakan",
+        message: "Email sudah digunakan",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
 
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashedPassword,
-      },
-    });
+    const [result] = await db.execute(
+      `
+            INSERT INTO users
+            (name, email, password)
+            VALUES (?, ?, ?)
+            `,
+      [name, email, hashedPassword]
+    );
 
     res.status(201).json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      createdAt: user.createdAt,
+      success: true,
+      userId: result.insertId,
     });
   } catch (error) {
     res.status(500).json({
@@ -45,17 +46,18 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const [users] = await db.execute(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
 
-    if (!user) {
+    if (users.length === 0) {
       return res.status(404).json({
         message: "User tidak ditemukan",
       });
     }
+
+    const user = users[0];
 
     const isMatch = await bcrypt.compare(
       password,
@@ -72,6 +74,7 @@ const login = async (req, res) => {
       {
         id: user.id,
         email: user.email,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       {
@@ -81,6 +84,12 @@ const login = async (req, res) => {
 
     res.json({
       token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -89,20 +98,22 @@ const login = async (req, res) => {
   }
 };
 
-const profile = async (req,res) => {
+const profile = async (req, res) => {
   try {
-    const user = await prisma.user.findUnique({
-      where : {
-        id: req.user.id,
-      },
-    });
-    res.json ({
-      id:user.id,
-      username:user.username,
-      email:user.email,
-    });
+    const [users] = await db.execute(
+      "SELECT id, name, email, role FROM users WHERE id = ?",
+      [req.user.id]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        message: "User tidak ditemukan",
+      });
+    }
+
+    res.json(users[0]);
   } catch (error) {
-    res.status (500).json ({
+    res.status(500).json({
       message: error.message,
     });
   }

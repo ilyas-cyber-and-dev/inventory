@@ -40,11 +40,34 @@ const createProduct = async (req, res) => {
     try {
         const { name, sku, description, price, stock } = req.body;
 
+        if (!name || !sku || price === undefined || price === null || price === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Name, SKU, and Price are required fields.",
+            });
+        }
+
+        const parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice)) {
+            return res.status(400).json({
+                success: false,
+                message: "Price must be a valid number.",
+            });
+        }
+
+        const parsedStock = stock === "" || stock === undefined || stock === null ? 0 : parseInt(stock, 10);
+        if (isNaN(parsedStock)) {
+            return res.status(400).json({
+                success: false,
+                message: "Stock must be a valid integer.",
+            });
+        }
+
         const [result] = await db.execute(
             `INSERT INTO products
       (name, sku, description, price, stock)
       VALUES (?, ?, ?, ?, ?)`,
-            [name, sku, description, price, stock]
+            [name, sku, description || null, parsedPrice, parsedStock]
         );
 
         res.status(201).json({
@@ -64,11 +87,34 @@ const updateProduct = async (req, res) => {
         const { id } = req.params;
         const { name, sku, description, price, stock } = req.body;
 
+        if (!name || !sku || price === undefined || price === null || price === "") {
+            return res.status(400).json({
+                success: false,
+                message: "Name, SKU, and Price are required fields.",
+            });
+        }
+
+        const parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice)) {
+            return res.status(400).json({
+                success: false,
+                message: "Price must be a valid number.",
+            });
+        }
+
+        const parsedStock = stock === "" || stock === undefined || stock === null ? 0 : parseInt(stock, 10);
+        if (isNaN(parsedStock)) {
+            return res.status(400).json({
+                success: false,
+                message: "Stock must be a valid integer.",
+            });
+        }
+
         await db.execute(
             `UPDATE products
        SET name = ?, sku = ?, description = ?, price = ?, stock = ?
        WHERE id = ?`,
-            [name, sku, description, price, stock, id]
+            [name, sku, description || null, parsedPrice, parsedStock, id]
         );
 
         res.status(200).json({
