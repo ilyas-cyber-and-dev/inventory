@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 
 const authRouter = require("./routes/authRoutes");
+console.log("AUTH ROUTER =", authRouter);
 const productRouter = require("./routes/productRoutes");
 const dashboardRouter = require("./routes/dashboardRoutes");
 

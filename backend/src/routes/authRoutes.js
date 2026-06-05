@@ -1,6 +1,11 @@
 const express = require("express");
+
+console.log("AUTH ROUTES LOADED");
+
 const router = express.Router();
+
 const authMiddleware = require("../middleware/authMiddleware");
+
 const {
   register,
   login,
@@ -16,4 +21,5 @@ router.get("/test", (req, res) => {
     message: "auth route works",
   });
 });
-module.exports = router
+
+module.exports = router;
